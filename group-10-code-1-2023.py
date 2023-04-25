@@ -4,6 +4,16 @@ import numpy as n
 import math as m
 import csv
 
+#Overlappping_modularity
+def overlapping_modularity(G, communities):
+    m = G.size(weight='weight')
+    Q = 0
+    for community in communities:
+        intra_edges = G.subgraph(community).size(weight='weight')
+        incident_edges = sum(G.degree(community, weight='weight').values())
+        Q += (intra_edges/m - (incident_edges/(2*m))**2)
+    return Q/(2*m)
+
 ########################################
 def print_matrix(A) :
     for row in A :
@@ -219,6 +229,7 @@ for node in g.nodes():
     part_of = Node_comlist[node]
     w = p.pie([1]*len(part_of), center= pos[node], colors=[cmap(q/Nc) for q in part_of], radius=0.05)'''
 
+print("Overlapping Modularity = ", overlapping_modularity(g, C))
 nx.draw_networkx(g, with_labels=True, edgecolors="black", edge_color="magenta", width=1, node_size=300, node_color="yellow" )
 p.title("Graph")
 p.show()
