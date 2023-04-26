@@ -4,15 +4,51 @@ import numpy as n
 import math as m
 import csv
 
-#Overlappping_modularity
-def overlapping_modularity(G, communities):
-    m = G.size(weight='weight')
-    Q = 0
-    for community in communities:
-        intra_edges = G.subgraph(community).size(weight='weight')
-        incident_edges = sum(G.degree(community, weight='weight').values())
-        Q += (intra_edges/m - (incident_edges/(2*m))**2)
-    return Q/(2*m)
+#quality measures
+def unifiability (G, Ci, Cj):
+    sum1, sum2, sum3 = 0, 0, 0
+    for i in Ci:
+        for j in Cj:
+            sum1 += 1 if G.has_edge(i, j) else 0
+    for i in Ci:
+        for j in G:
+            sum2 += 1 if G.has_edge(i, j) else 0
+        for j in Cj:
+            sum2 -= 1 if G.has_edge(i, j) else 0
+    for i in Cj:
+        for j in G:
+            sum3 += 1 if G.has_edge(i, j) else 0
+        for j in Ci:
+            sum3 -= 1 if G.has_edge(i, j) else 0
+    return sum1 / (sum2 + sum3 - sum1)
+#Average Uniformality
+def AVU (G, cluster):
+    #CALLING UNIFIABILITY FOR ALL CLUSTERS
+    sum_unifiability = 0
+    for i in cluster:
+        for j in cluster:
+            if i != j:
+                sum_unifiability += unifiability (G, cluster[i], cluster[j])
+    return sum_unifiability / len (cluster)
+
+#Isolability
+def isolability (G, Ci):
+    sum1, sum2 = 0, 0
+    for i in Ci:
+        for j in Ci:
+            sum1 += 1 if G.has_edge(i, j) else 0
+    for i in Ci:
+        for j in G:
+            if i != j:
+                sum2 += 1 if G.has_edge(i, j) else 0
+    return sum1 / (sum1 + sum2)
+
+#average isolabiltiy
+def AVI (G, cluster):
+    sum = 0
+    for i in cluster:
+        sum += isolability (G, cluster[i])
+    return sum / len (cluster)
 
 ########################################
 def print_matrix(A) :
